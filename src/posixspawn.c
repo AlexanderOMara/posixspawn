@@ -89,8 +89,8 @@ void usage() {
 		"\n"
 		"options:\n"
 		"  -f <flags> Pipe-delimited list of flags (see flags section below).\n"
-		"  -p <path>  Set the executable path separate from arg 0.\n"
-		"  -w         Wait for child process to complete before returning?\n"
+		"  -p <path>  Set the executable path separate from argv[0].\n"
+		"  -w         Wait for child process to complete before returning.\n"
 		"\n"
 		"args:\n"
 		"  The remaining arguments are passed to the child process.\n"
@@ -98,10 +98,9 @@ void usage() {
 		"flags:\n"
 		"  The flags arguments is a pipe-delimited list of constants or integers.\n"
 		"  A flag can be a string constant, a base-16 string, or a base-10 string.\n"
-		"  The flag uses the short data type, with each flag a maximum 2 bytes.\n"
 		"  Example argument:\n"
 		"    \"EXAMPLE_CONSTANT|0xF0|16\"\n"
-		"  The following string constants are supported:\n"
+		"  String constants:\n"
 	);
 	size_t constant_length = sizeof(poxis_spawn_items) / sizeof(struct constant);
 	for (size_t i = 0; i < constant_length; i++) {
