@@ -13,9 +13,18 @@
 #include <string.h>
 #include <spawn.h>
 
-// Define Apple's private constants (from bsd/sys/spawn.h).
+// Define Apple's private constants (bsd/sys/spawn.h, bsd/sys/spawn_internal.h).
 #ifndef POSIX_SPAWN_OSX_TALAPP_START
 	#define POSIX_SPAWN_OSX_TALAPP_START 0x0400
+#endif
+#ifndef POSIX_SPAWN_IOS_RESV1_APP_START
+	#define POSIX_SPAWN_IOS_RESV1_APP_START 0x0400
+#endif
+#ifndef POSIX_SPAWN_IOS_APPLE_DAEMON_START
+	#define POSIX_SPAWN_IOS_APPLE_DAEMON_START 0x0800
+#endif
+#ifndef POSIX_SPAWN_IOS_APP_START
+	#define POSIX_SPAWN_IOS_APP_START 0x1000
 #endif
 #ifndef POSIX_SPAWN_OSX_WIDGET_START
 	#define POSIX_SPAWN_OSX_WIDGET_START 0x0800
@@ -48,20 +57,25 @@ struct argdata {
 };
 
 struct constant poxis_spawn_items[] = {
-	{ .name = "POSIX_SPAWN_RESETIDS"           , .flag = POSIX_SPAWN_RESETIDS           },
-	{ .name = "POSIX_SPAWN_SETPGROUP"          , .flag = POSIX_SPAWN_SETPGROUP          },
-	{ .name = "POSIX_SPAWN_SETSIGDEF"          , .flag = POSIX_SPAWN_SETSIGDEF          },
-	{ .name = "POSIX_SPAWN_SETSIGMASK"         , .flag = POSIX_SPAWN_SETSIGMASK         },
-	{ .name = "POSIX_SPAWN_SETEXEC"            , .flag = POSIX_SPAWN_SETEXEC            },
-	{ .name = "POSIX_SPAWN_START_SUSPENDED"    , .flag = POSIX_SPAWN_START_SUSPENDED    },
-	{ .name = "POSIX_SPAWN_CLOEXEC_DEFAULT"    , .flag = POSIX_SPAWN_CLOEXEC_DEFAULT    },
-	// Private constants.
-	{ .name = "POSIX_SPAWN_OSX_TALAPP_START"   , .flag = POSIX_SPAWN_OSX_TALAPP_START   },
-	{ .name = "POSIX_SPAWN_OSX_WIDGET_START"   , .flag = POSIX_SPAWN_OSX_WIDGET_START   },
-	{ .name = "POSIX_SPAWN_OSX_DBCLIENT_START" , .flag = POSIX_SPAWN_OSX_DBCLIENT_START },
-	{ .name = "POSIX_SPAWN_OSX_RESVAPP_START"  , .flag = POSIX_SPAWN_OSX_RESVAPP_START  },
-	{ .name = "_POSIX_SPAWN_DISABLE_ASLR"      , .flag = _POSIX_SPAWN_DISABLE_ASLR      },
-	{ .name = "_POSIX_SPAWN_ALLOW_DATA_EXEC"   , .flag = _POSIX_SPAWN_ALLOW_DATA_EXEC   }
+	{ .name = "POSIX_SPAWN_RESETIDS"              , .flag = POSIX_SPAWN_RESETIDS               },
+	{ .name = "POSIX_SPAWN_SETPGROUP"             , .flag = POSIX_SPAWN_SETPGROUP              },
+	{ .name = "POSIX_SPAWN_SETSIGDEF"             , .flag = POSIX_SPAWN_SETSIGDEF              },
+	{ .name = "POSIX_SPAWN_SETSIGMASK"            , .flag = POSIX_SPAWN_SETSIGMASK             },
+	{ .name = "POSIX_SPAWN_SETEXEC"               , .flag = POSIX_SPAWN_SETEXEC                },
+	{ .name = "POSIX_SPAWN_START_SUSPENDED"       , .flag = POSIX_SPAWN_START_SUSPENDED        },
+	{ .name = "POSIX_SPAWN_SETSID"                , .flag = POSIX_SPAWN_SETSID                 },
+	{ .name = "POSIX_SPAWN_CLOEXEC_DEFAULT"       , .flag = POSIX_SPAWN_CLOEXEC_DEFAULT        },
+	{ .name = "_POSIX_SPAWN_RESLIDE"              , .flag = _POSIX_SPAWN_RESLIDE               },
+	// Private.
+	{ .name = "POSIX_SPAWN_OSX_TALAPP_START"      , .flag = POSIX_SPAWN_OSX_TALAPP_START       },
+	{ .name = "POSIX_SPAWN_IOS_RESV1_APP_START"   , .flag = POSIX_SPAWN_IOS_RESV1_APP_START    },
+	{ .name = "POSIX_SPAWN_IOS_APPLE_DAEMON_START", .flag = POSIX_SPAWN_IOS_APPLE_DAEMON_START },
+	{ .name = "POSIX_SPAWN_IOS_APP_START"         , .flag = POSIX_SPAWN_IOS_APP_START          },
+	{ .name = "POSIX_SPAWN_OSX_WIDGET_START"      , .flag = POSIX_SPAWN_OSX_WIDGET_START       },
+	{ .name = "POSIX_SPAWN_OSX_DBCLIENT_START"    , .flag = POSIX_SPAWN_OSX_DBCLIENT_START     },
+	{ .name = "POSIX_SPAWN_OSX_RESVAPP_START"     , .flag = POSIX_SPAWN_OSX_RESVAPP_START      },
+	{ .name = "_POSIX_SPAWN_DISABLE_ASLR"         , .flag = _POSIX_SPAWN_DISABLE_ASLR          },
+	{ .name = "_POSIX_SPAWN_ALLOW_DATA_EXEC"      , .flag = _POSIX_SPAWN_ALLOW_DATA_EXEC       }
 };
 
 void usage() {
