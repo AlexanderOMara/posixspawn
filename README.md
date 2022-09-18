@@ -2,6 +2,8 @@
 
 The power of posix_spawn in your shell.
 
+[![Build Status](https://github.com/AlexanderOMara/posixspawn/workflows/main/badge.svg?branch=master)](https://github.com/AlexanderOMara/posixspawn/actions?query=workflow%3Amain+branch%3Amaster)
+
 
 ## Overview
 
