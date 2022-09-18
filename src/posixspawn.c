@@ -6,6 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#define POSIXSPAWN_VERSION "1.0.0"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -66,7 +68,7 @@ struct constant poxis_spawn_items[] = {
 	{ .name = "POSIX_SPAWN_SETSID"                , .flag = POSIX_SPAWN_SETSID                 },
 	{ .name = "POSIX_SPAWN_CLOEXEC_DEFAULT"       , .flag = POSIX_SPAWN_CLOEXEC_DEFAULT        },
 	{ .name = "_POSIX_SPAWN_RESLIDE"              , .flag = _POSIX_SPAWN_RESLIDE               },
-	// Private.
+	// Private and deprecated.
 	{ .name = "POSIX_SPAWN_OSX_TALAPP_START"      , .flag = POSIX_SPAWN_OSX_TALAPP_START       },
 	{ .name = "POSIX_SPAWN_IOS_RESV1_APP_START"   , .flag = POSIX_SPAWN_IOS_RESV1_APP_START    },
 	{ .name = "POSIX_SPAWN_IOS_APPLE_DAEMON_START", .flag = POSIX_SPAWN_IOS_APPLE_DAEMON_START },
@@ -74,20 +76,24 @@ struct constant poxis_spawn_items[] = {
 	{ .name = "POSIX_SPAWN_OSX_WIDGET_START"      , .flag = POSIX_SPAWN_OSX_WIDGET_START       },
 	{ .name = "POSIX_SPAWN_OSX_DBCLIENT_START"    , .flag = POSIX_SPAWN_OSX_DBCLIENT_START     },
 	{ .name = "POSIX_SPAWN_OSX_RESVAPP_START"     , .flag = POSIX_SPAWN_OSX_RESVAPP_START      },
+	// Private.
 	{ .name = "_POSIX_SPAWN_DISABLE_ASLR"         , .flag = _POSIX_SPAWN_DISABLE_ASLR          },
 	{ .name = "_POSIX_SPAWN_ALLOW_DATA_EXEC"      , .flag = _POSIX_SPAWN_ALLOW_DATA_EXEC       }
 };
 
-void usage() {
-	printf(
+void usage(FILE *out) {
+	fprintf(
+		out,
 		"posixspawn -- The power of posix_spawn in your shell.\n"
-		"Version 1.0.0\n"
+		"Version %s\n"
 		"Copyright (c) 2015-2022 Alexander O'Mara\n"
 		"Licensed under MPL 2.0 <http://mozilla.org/MPL/2.0/>\n"
 		"\n"
 		"Usage: posixspawn [options...] [--] [args...]\n"
 		"\n"
 		"options:\n"
+		"  -h         Show this help message.\n"
+		"  -v         Show version.\n"
 		"  -f <flags> Pipe-delimited list of flags (see flags section below).\n"
 		"  -p <path>  Set the executable path separate from argv[0].\n"
 		"  -w         Wait for child process to complete before returning.\n"
@@ -100,13 +106,23 @@ void usage() {
 		"  A flag can be a string constant, a base-16 string, or a base-10 string.\n"
 		"  Example argument:\n"
 		"    \"EXAMPLE_CONSTANT|0xF0|16\"\n"
-		"  String constants:\n"
+		"  String constants:\n",
+		POSIXSPAWN_VERSION
 	);
 	size_t constant_length = sizeof(poxis_spawn_items) / sizeof(struct constant);
 	for (size_t i = 0; i < constant_length; i++) {
-		printf("    0x%04x  %s\n", poxis_spawn_items[i].flag, poxis_spawn_items[i].name);
+		fprintf(
+			out,
+			"    0x%04x  %s\n",
+			poxis_spawn_items[i].flag,
+			poxis_spawn_items[i].name
+		);
 	}
-	printf("\n");
+	fprintf(out, "\n");
+}
+
+void version() {
+	printf("%s\n", POSIXSPAWN_VERSION);
 }
 
 short parse_constant(char *s, struct constant *c, size_t constant_size) {
@@ -136,7 +152,7 @@ short parse_constant(char *s, struct constant *c, size_t constant_size) {
 				// If no flags identified, maybe hex or integer.
 				if (!flag) {
 					// Maybe hex.
-					if (s_l > 2  && s[s_s] == '0' && (s[s_s + 1] == 'x' || s[s_s + 1] == 'X')) {
+					if (s_l > 2 && s[s_s] == '0' && (s[s_s + 1] == 'x' || s[s_s + 1] == 'X')) {
 						flag = (short)strtol(&s[s_s], NULL, 0);
 					}
 					// If still zero, maye just integer.
@@ -158,7 +174,7 @@ struct argdata parse_args(int argc, char **argv) {
 	struct argdata args;
 	// Check for the minimum 1 argument.
 	if (argc <= 1) {
-		usage();
+		usage(stderr);
 		exit(EXIT_FAILURE);
 	}
 	// Initialize the return data.
@@ -167,26 +183,39 @@ struct argdata parse_args(int argc, char **argv) {
 	args.wait = FALSE;
 	args.args = NULL;
 	// Parse arguments.
-	for (int opt; (opt = getopt(argc, argv, "f:p:w")) != -1;) {
+	for (int opt; (opt = getopt(argc, argv, "hvf:p:w")) != -1;) {
 		switch (opt) {
-			case 'f':
+			case 'h': {
+				usage(stdout);
+				exit(EXIT_SUCCESS);
+				break;
+			}
+			case 'v': {
+				version();
+				exit(EXIT_SUCCESS);
+				break;
+			}
+			case 'f': {
 				args.flags = parse_constant(optarg, poxis_spawn_items, sizeof(poxis_spawn_items));
 				break;
-			case 'p':
+			}
+			case 'p': {
 				args.path = optarg;
 				break;
-			case 'w':
+			}
+			case 'w': {
 				args.wait = TRUE;
 				break;
-			default:
-				usage();
+			}
+			default: {
 				exit(EXIT_FAILURE);
+			}
 		}
 	}
 	// Compute remaining arguments, requiring at least one more.
 	int args_count = argc - optind;
 	if (args_count <= 0 && !args.path) {
-		usage();
+		fprintf(stderr, "%s: no executable specified\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	// Initialize memory for the arguments array, plus a null terminator.
