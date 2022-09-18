@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#define POSIXSPAWN_VERSION "1.0.0"
+#define POSIXSPAWN_VERSION "2.0.0"
 
 #include <stdio.h>
 #include <stdlib.h>

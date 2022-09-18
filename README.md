@@ -15,7 +15,7 @@ This is a command-line utility that wraps the `posix_spawn` function, exposing t
 ```
 $ posixspawn
 posixspawn -- The power of posix_spawn in your shell.
-Version 1.0.0
+Version 2.0.0
 Copyright (c) 2015-2022 Alexander O'Mara
 Licensed under MPL 2.0 <http://mozilla.org/MPL/2.0/>
 
